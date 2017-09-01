@@ -154,6 +154,17 @@ foreach ($events as $event) {
     continue;
   }
 
-  replyTextMessage($bot, $event->getReplyToken(), $location.' location ID is '.$locationId.'.');
+  // replyTextMessage($bot, $event->getReplyToken(), $location.' location ID is '.$locationId.'.');
+
+  // if get location ID, get weather by json-file
+  $jsonString = file_get_contents('http://weather.livedoor.com/forecast/webservice/json/v1?city='.$locationId);
+  $json = json_decode($jsonString, true);
+
+  // parse weather updated time
+  $date = date_parse_from_format('Y-m-d\TH:i:sP', $json['description']['publicTime']);
+
+  // reply weather and updated time
+  $updateTimeString = sprintf('%s/%s %s:%s', $date['month'], $date['day'], $date['hour'], $date['minute']);
+  replyTextMessage($bot, $event->getReplyToken(), $json['description']['text'].PHP_EOL.PHP_EOL.'Latest Update: '.$updateTimeString);
 }
 ?>
