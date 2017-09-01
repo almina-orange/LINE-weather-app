@@ -28,6 +28,7 @@ try {
   error_log('parseEventRequest failed. InvalidEventRequestException => '.var_export($e, true));
 }
 
+/*=== main process ===*/
 // proceed events
 foreach ($events as $event) {
   // skip if not MessageEvent Class
@@ -37,16 +38,58 @@ foreach ($events as $event) {
   }
 
   // skip if not TextMessage Class
-  if (!($event instanceof \LINE\LINEBot\Event\MessageEvent\TextMessage)) {
-    error_log('Non text message has come');
-    continue;
+  // if (!($event instanceof \LINE\LINEBot\Event\MessageEvent\TextMessage)) {
+  //   error_log('Non text message has come');
+  //   continue;
+  // }
+
+  // get location from "TextMessage"
+  if ($event instanceof \LINE\LINEBot\Event\MessageEvent\TextMessage) {
+    $location = $event->getText();
+  }
+  // get location from "LocationMessage"
+  else if ($event instanceof \LINE\LINEBot\Event\MessageEvent\LocationMessage) {
+    // replyTextMessage($bot, $event->getReplyToken(), $event->getAddress().'['.$event->getLatitude().','.$event->getLongitude().']');
+    // continue;
+    // use Google API: Geocoding, and get location by latitude and longitude
+    $lat = $event->getLatitude();
+    $lng = $event->getLongitude();
+    $jsonString = file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?language=ja&latlng='.$lat.','.$lng);
+
+    // decode json-string to json-array
+    $json = json_decode($jsonString, true);
+
+    // extract location
+    $addressComponentArray = $json['results'][0]['address_components'];
+
+    foreach ($addressComponentArray as $addressComponent) {
+      // get prefacture
+      if (in_array('administrative_area_level_1', $addressComponent['types'])) {
+        $prefName = $addressComponent['long_name'];
+        break;
+      }
+    }
+
+    // exception for "Tokyo" and "Osaka"
+    if ($prefName == '東京都') {
+      $location = '東京';
+    } else if ($prefName == '大阪府') {
+      $location = '大阪';
+    } else {
+      foreach ($addressComponentArray as $addressComponent) {
+        // get city
+        if (in_array('locality', $addressComponent['types']) && !in_array('ward', $addressComponent['types'])) {
+          $location = $addressComponent['long_name'];
+          break;
+        }
+      }
+    }
   }
 
   error_log(file_get_contents('php://input'));
 
-  /*=== main process ===*/
   // get user input
-  $location = $event->getText();
+  // $location = $event->getText();
 
   // class parsing XML
   $client = new Goutte\Client();
@@ -65,6 +108,11 @@ foreach ($events as $event) {
 
   // if not match to city
   if (empty($locationId)) {
+    // if "LocationMessage", use it
+    if ($event instanceof \LINE\LINEBot\Event\MessageEvent\LocationMessage) {
+      $location = $prefName;
+    }
+
     // suggestion array
     $suggestArray = array();
 
@@ -92,13 +140,13 @@ foreach ($events as $event) {
       }
 
       // reply button template
-      $buttonBuilder = new \LINE\LINEBot\MessageBuilder\TemplateBuilder\ButtonTemplateBuilder('Not found.', 'perhaps?', null, $actionArray);
+      $buttonBuilder = new \LINE\LINEBot\MessageBuilder\TemplateBuilder\ButtonTemplateBuilder('Not found city.', 'perhaps?', null, $actionArray);
       $builder = new \LINE\LINEBot\MessageBuilder\TemplateMessageBuilder('not found.', $buttonBuilder);
 
       $bot->replyMessage($event->getReplyToken(), $builder);
     }
     else {
-      replyTextMessage($bot, $event->getReplyToken(), 'Not found suggestions. Please city name.');
+      replyTextMessage($bot, $event->getReplyToken(), 'Not found location. Please city name.');
     }
 
     // skip after process
