@@ -20,5 +20,4 @@ $response = $bot->pushMessage($userId, new \LINE\LINEBot\MessageBuilder\TextMess
 if (!$response->isSucceeded()) {
   error_log('Failed!'.$response->getHTTPStatus.' '.$response->getRawBody());
 }
-}
 ?>
