@@ -101,7 +101,7 @@ foreach ($events as $event) {
   // extract city and compare with user input
   foreach ($crawler->filter('channel ldWeather|source pref city') as $city) {
     // if match city name, get location ID
-    if (strpos($city->getAttribute('title'), $location) || strpos($city->getAttribute('title').'市', $location)) {
+    if (strpos($city->getAttribute('title'), $location) !== false || strpos($city->getAttribute('title').'市', $location) !== false) {
       $locationId = $city->getAttribute('id');
       break;
     }
@@ -120,7 +120,7 @@ foreach ($events as $event) {
     // extract prefacture and compare with user input
     foreach ($crawler->filter('channel ldWeather|source pref') as $pref) {
       // if match prefacture, get suggested city
-      if (strpos($pref->getAttribute('title'), $location)) {
+      if (strpos($pref->getAttribute('title'), $location) !== false) {
         foreach ($pref->childNodes as $child) {
           if ($child instanceof DOMElement && $child->nodeName == 'city') {
             array_push($suggestArray, $child->getAttribute('title'));
