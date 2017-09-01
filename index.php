@@ -56,7 +56,6 @@ foreach ($events as $event) {
 
   // extract city and compare with user input
   foreach ($crawler->filter('channel ldWeather|source pref city') as $city) {
-    error_log($city);
     // if match city name, get location ID
     if (strpos($city->getAttribute('title'), $location) !== false) {
       $locationId = $city->getAttribute('id');
