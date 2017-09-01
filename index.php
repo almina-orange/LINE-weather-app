@@ -69,7 +69,7 @@ foreach ($events as $event) {
     $suggestArray = array();
 
     // extract prefacture and compare with user input
-    foreach ($crawler->filter('channle ldWeather|source pref') as $pref) {
+    foreach ($crawler->filter('channel ldWeather|source pref') as $pref) {
       // if match prefacture, get suggested city
       if (strpos($pref->getAttribute('title'), $location) !== false) {
         foreach ($pref->childNodes as $child) {
