@@ -87,6 +87,7 @@ foreach ($events as $event) {
   }
 
   error_log(file_get_contents('php://input'));
+  error_log('location'.var_export($location, true));
 
   // get user input
   // $location = $event->getText();
