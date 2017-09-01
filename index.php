@@ -87,7 +87,7 @@ foreach ($events as $event) {
       $actionArray = array();
 
       // add all suggestions as action
-      foreach ($sugegstArray as $city) {
+      foreach ($suggestArray as $city) {
         array_push($actionArray, new \LINE\LINEBot\TemplateActionBuilder\MessageTemplateActionBuilder($city, $city));
       }
 
