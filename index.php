@@ -164,13 +164,13 @@ foreach ($events as $event) {
   $date = date_parse_from_format('Y-m-d\TH:i:sP', $json['description']['publicTime']);
 
   // reply weather and updated time
-  if ($json['forecast'][0]['telop'] == '晴れ') {
+  if ($json['forecasts'][0]['telop'] == '晴れ') {
     // reply sticker of weather, updated time, and sunny
     $updateTimeString = sprintf('%s/%s %s:%s', $date['month'], $date['day'], $date['hour'], $date['minute']);
     $msg1 = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder($json['description']['text'].PHP_EOL.PHP_EOL.'Update:'.$updateTimeString);
     $msg2 = new \LINE\LINEBot\MessageBuilder\StickerMessageBuilder(2, 513);
     replyMultiMessage($bot, $event->getReplyToken(), $msg1, $msg2);
-  } else if ($json['forecast'][0]['telop'] == '雨') {
+  } else if ($json['forecasts'][0]['telop'] == '雨') {
     // reply sticker of weather, updated time, and rainy
     $updateTimeString = sprintf('%s/%s %s:%s', $date['month'], $date['day'], $date['hour'], $date['minute']);
     $msg1 = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder($json['description']['text'].PHP_EOL.PHP_EOL.'Update:'.$updateTimeString);
