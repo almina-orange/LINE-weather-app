@@ -42,6 +42,7 @@ foreach ($events as $event) {
     continue;
   }
 
+  /*=== main process ===*/
   // get user input
   $location = $event->getText();
 
@@ -51,15 +52,57 @@ foreach ($events as $event) {
   // get XML file using "Livedoor Weather API"
   $crawler = $client->request('GET', 'http://weather.livedoor.com/forecast/rss/primary_area.xml');
 
-  error_log(var_export($crawler, true));
-
-  // extracting city name and compare with user input
+  // extract city and compare with user input
   foreach ($crawler->filter('channle ldWeather|source pref city') as $city) {
-    // if match, get location ID
-    if ($city->getAttribute('title') == $location || $city->getAttribute('title')."市" == $location) {
+    // if match city name, get location ID
+    if (strpos($city->getAttribute('title'), $location) !== false) {
       $locationId = $city->getAttribute('id');
       break;
     }
   }
+
+  // if not match to city
+  if (empty($locationId)) {
+    // suggestion array
+    $suggestArray = array();
+
+    // extract prefacture and compare with user input
+    foreach ($crawler->filter('channle ldWeather|source pref') as $pref) {
+      // if match prefacture, get suggested city
+      if (strpos($pref->getAttribute('title'), $location) !== false) {
+        foreach ($pref->childNodes as $child) {
+          if ($child instanceof DOMElement && $child->nodeName == 'city') {
+            array_push($suggestArray, $child->getAttribute('title'));
+          }
+        }
+        break;
+      }
+    }
+
+    // if suggestion exist
+    if (count($suggestArray) > 0) {
+      // action array
+      $actionArray = array();
+
+      // add all suggestions as action
+      foreach ($sugegstArray as $city) {
+        array_push($actionArray, new \LINE\LINEBot\TemplateActionBuilder\MessageTemplateActionBuilder($city, $city));
+      }
+
+      // reply button template
+      $buttonBuilder = new \LINE\LINEBot\MessageBuilder\TemplateBuilder\ButtonTemplateBuilder('Not found.', 'perhaps?', null, $actionArray);
+      $builder = new \LINE\LINEBot\MessageBuilder\TemplateMessageBuilder('not found.', $buttonBuilder);
+
+      $bot->replyMessage($event->getReplyToken(), $builder);
+    }
+    else {
+      replyTextMessage($bot, $event->getReplyToken(), 'Not found suggestions. Please city name.');
+    }
+
+    // skip after process
+    continue;
+  }
+
+  replyTextMessage($bot, $event->getReplyToken(), $location.' location ID is '.$locationId.'.');
 }
 ?>
