@@ -55,7 +55,7 @@ foreach ($events as $event) {
   $crawler = $client->request('GET', 'http://weather.livedoor.com/forecast/rss/primary_area.xml');
 
   // extract city and compare with user input
-  foreach ($crawler->filter('channle ldWeather|source pref city') as $city) {
+  foreach ($crawler->filter('channel ldWeather|source pref city') as $city) {
     error_log($city);
     // if match city name, get location ID
     if (strpos($city->getAttribute('title'), $location) !== false) {
