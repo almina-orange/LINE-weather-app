@@ -42,7 +42,24 @@ foreach ($events as $event) {
     continue;
   }
 
-  // parrot
-  $bot->replyText($event->getReplyToken(), $event->getText());
+  // get user input
+  $location = $event->getText();
+
+  // class parsing XML
+  $client = new Goutte\Client();
+
+  // get XML file using "Livedoor Weather API"
+  $crawler = $client->request('GET', 'http://weather.livedoor.com/forecast/rss/primary_area.xml');
+
+  error_log(var_export($crawler, true));
+
+  // extracting city name and compare with user input
+  foreach ($crawler->filter('channle ldWeather|source pref city') as $city) {
+    // if match, get location ID
+    if ($city->getAttribute('title') == $location || $city->getAttribute('title')."市" == $location) {
+      $locationId = $city->getAttribute('id');
+      break;
+    }
+  }
 }
 ?>
