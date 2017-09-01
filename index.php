@@ -42,6 +42,8 @@ foreach ($events as $event) {
     continue;
   }
 
+  error_log(file_get_contents('php://input'));
+
   /*=== main process ===*/
   // get user input
   $location = $event->getText();
