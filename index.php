@@ -31,6 +31,7 @@ try {
 /*=== main process ===*/
 // proceed events
 foreach ($events as $event) {
+  error_log($event->getUserId());
   // skip if not MessageEvent Class
   if (!($event instanceof \LINE\LINEBot\Event\MessageEvent)) {
     error_log('Non message event has come');
