@@ -178,6 +178,7 @@ foreach ($events as $event) {
     $msg2 = new \LINE\LINEBot\MessageBuilder\StickerMessageBuilder(2, 507);
     replyMultiMessage($bot, $event->getReplyToken(), $msg1, $msg2);
   } else {
+    // reply message and updated time
     $updateTimeString = sprintf('%s/%s %s:%s', $date['month'], $date['day'], $date['hour'], $date['minute']);
     replyTextMessage($bot, $event->getReplyToken(), $json['description']['text'].PHP_EOL.PHP_EOL.'Update: '.$updateTimeString);
   }
